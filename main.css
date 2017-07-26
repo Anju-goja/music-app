@@ -77,9 +77,11 @@ h1 {
 
 #logo{
     display:inline-block;
-    color:white;
-    margin-left: 10px;
+    color:#00ff8b;
+    margin-left: 40px;
     position:relative;
+    font-size: 35px;
+    font-family: cooper;
 }
 
 .clickable {
@@ -133,14 +135,17 @@ h1 {
 .list-headers > div {
     width: 150px;
     display: inline-block;
+    
 }
 
 .list-headers > div:first-child {
     width: 330px;
+    font-family: cooper;
 }
 
 .list-headers > div:last-child {
     text-align: right;
+    
 }
 
 .song-list .song {
@@ -230,9 +235,6 @@ table.dataTable tbody tr {
     margin-right: 2rem;
 }
 
-.fa.disabled {
-    color: white;
-}
 .fa.disabled {
     color: white;
 }
