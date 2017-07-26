@@ -1,3 +1,4 @@
+
 function fancyTimeFormat(time)
 {   
     // Hours, minutes and seconds
@@ -22,13 +23,27 @@ function fancyTimeFormat(time)
 function updateCurrentTime() {
     var song = document.querySelector('audio');
     var currentTime = Math.floor(song.currentTime);
-    currentTime = fancyTimeFormat(currentTime);
     var duration = Math.floor(song.duration);
+    var bar=(currentTime*100)/duration;
+    currentTime = fancyTimeFormat(currentTime);
     duration = fancyTimeFormat(duration)
     $('.time-elapsed').text(currentTime);
     $('.song-duration').text(duration);
+    Progressbar(bar);
 }
-        
+ //progressbar
+function Progressbar(bar){
+          var prog = document.querySelector('.progress-filled');
+          prog.style.width= bar +"%";//final width css
+        }
+        $('.player-progress').click(function(event){
+            var $this=$(this);
+            var selectedLength= event.pageX-$this.offset().left;//jitni length se song play krna h
+            var totalLength=$this.width();//song ka total span
+            var width=(selectedLength/totalLength)*100;
+            var song=document.querySelector('audio');
+            song.currentTime=(song.duration*width)/100;
+        });       
                   
 
 var songs = [{
@@ -64,13 +79,13 @@ var songs = [{
     'fileName': 'song4.mp3',
     'image': 'song4.jpg'
 },
-  {
+ {
     'name': 'Humma humma song',
     'artist': 'Badshah, A.R rehman',
     'album': 'Ok jannu',
     'duration': '3:40',
-    'fileName': 'song5.mp3',
-    'image': 'song5.jpg'
+   'fileName': 'song5.mp3',
+   'image': 'song5.jpg'
 },
   {
     'name': 'Mai woh chand',
@@ -87,8 +102,8 @@ var songs = [{
     'duration': '3:07',
     'fileName': 'song7.mp3',
     'image': 'song7.jpg'
-},     
-]
+}     
+];
 
 function changeCurrentSongDetails(songObj) {
     $('.current-song-image').attr('src','img/' + songObj.image)
@@ -145,7 +160,65 @@ window.onload = function() {
     },1000);
  $('#songs').DataTable({
         paging: false
-  });     
+  });
+//    
+//     Progressbar(bar);
+    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  var audioElement = document.getElementById('audioElement');
+  var audioSrc = audioCtx.createMediaElementSource(audioElement);
+  var analyser = audioCtx.createAnalyser();
+
+  // Bind our analyser to the media element source.
+  audioSrc.connect(analyser);
+  audioSrc.connect(audioCtx.destination);
+
+  //var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+  var frequencyData = new Uint8Array(200);
+
+  var svgHeight = '400';
+  var svgWidth = '1000';
+  var barPadding = '1';
+
+  function createSvg(parent, height, width) {
+    return d3.select(parent).append('svg').attr('height', height).attr('width', width);
+  }
+
+  var svg = createSvg('.visualizer', svgHeight, svgWidth);
+
+  // Create our initial D3 chart.
+  svg.selectAll('rect')
+     .data(frequencyData)
+     .enter()
+     .append('rect')
+     .attr('x', function (d, i) {
+        return i * (svgWidth / frequencyData.length);
+     })
+     .attr('width', svgWidth / frequencyData.length - barPadding);
+
+  // Continuously loop and update chart with frequency data.
+  function renderChart() {
+     requestAnimationFrame(renderChart);
+
+     // Copy frequency data to frequencyData array.
+     analyser.getByteFrequencyData(frequencyData);
+
+     // Update d3 chart with new data.
+     svg.selectAll('rect')
+        .data(frequencyData)
+        .attr('y', function(d) {
+           return svgHeight - d;
+        })
+        .attr('height', function(d) {
+           return d;
+        })
+        .attr('fill', function(d) {
+           return 'rgb(0, ' + d + ', 0)';
+        });
+  }
+
+  // Run the loop
+  renderChart();
+
 }
 
 
@@ -183,32 +256,46 @@ $('.welcome-screen button').on('click', function() {
 });
         
 // click event...
+
 $('.play-icon').on('click', function() {
    toggleSong();
 });
 
+$('.fa-repeat').on('click', function() {
    
-//event for next song
-$('.fa-forward').on('click', function() {
-    toggleSong();
+    $('.fa-repeat').toggleClass('disabled')
+    willLoop = 1 - willLoop;
+
 });
 $('.fa-random').on('click', function() {
-    toggleSong();
-});
-$('.fa-repeat').on('click', function() {
-    toggleSong();
+   toggleSong();
 });
 $('.fa-backward').on('click', function() {
-    toggleSong();
+   toggleSong();
+});
+$('.fa-forward').on('click', function() {
+   toggleSong();
 });
 
 
 
 
-// keypress event...
-$('body').on('keypress', function(event) {
-    var target = event.target;
-    if (event.keyCode == 32 && target.tagName !='INPUT') {
-       toggleSong();
-    }
+
+
+$('.fa-bar-chart').on('click', function() {
+    
+    
+        $('.dataTables_wrapper').addClass('hidden');
+        $('.visualizer').removeClass('hidden');
+        
+
+});
+
+$('.fa-music').on('click', function() {
+    
+    
+        $('.dataTables_wrapper').removeClass('hidden');
+        $('.visualizer').addClass('hidden');
+        
+
 });
